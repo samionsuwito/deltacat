@@ -82,7 +82,9 @@ def upload_table_with_retry(
         filesystem = get_s3_file_system(content_type=content_type)
     capture_object = CapturedBlockWritePaths()
     block_write_path_provider = UuidBlockWritePathProvider(
-        capture_object=capture_object, base_path=s3_url_prefix
+        capture_object=capture_object,
+        base_path=s3_url_prefix,
+        content_type=content_type,
     )
     s3_table_writer_func = get_table_writer(table)
     table_record_count = get_table_length(table)
@@ -124,6 +126,9 @@ def upload_table_with_retry(
 
 def construct_s3_url(path: Optional[str]) -> Optional[str]:
     if path:
+        # Check if path already has s3:// prefix to avoid double prefixing
+        if path.startswith("s3://"):
+            return path
         return f"s3://{path}"
     return None
 
